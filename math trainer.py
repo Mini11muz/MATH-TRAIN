@@ -59,14 +59,17 @@ def main():
 
     min_num, max_num = get_nums(difficulty, operation)
 
+    # Session state setup
     if "score" not in st.session_state:
         st.session_state.score = 0
-    if "num1" not in st.session_state:
-        st.session_state.num1 = random.randint(min_num, max_num)
-        st.session_state.num2 = random.randint(min_num, max_num)
-        st.session_state.num1, st.session_state.num2, st.session_state.answer, st.session_state.symbol = ask_question(
-            st.session_state.num1, st.session_state.num2, operation
-        )
+    if "new_question" not in st.session_state:
+        st.session_state.new_question = True
+
+    if st.session_state.new_question or "answer" not in st.session_state:
+        num1 = random.randint(min_num, max_num)
+        num2 = random.randint(min_num, max_num)
+        st.session_state.num1, st.session_state.num2, st.session_state.answer, st.session_state.symbol = ask_question(num1, num2, operation)
+        st.session_state.new_question = False
 
     st.markdown(f"### What is {st.session_state.num1} {st.session_state.symbol} {st.session_state.num2}?")
     user_input = st.text_input("Your answer", key="user_input")
@@ -81,13 +84,9 @@ def main():
                 st.error(f"The answer was {st.session_state.answer}")
                 st.info(get_random_feedback("wrong"))
 
-            # Generate new question
-            st.session_state.num1 = random.randint(min_num, max_num)
-            st.session_state.num2 = random.randint(min_num, max_num)
-            st.session_state.num1, st.session_state.num2, st.session_state.answer, st.session_state.symbol = ask_question(
-                st.session_state.num1, st.session_state.num2, operation
-            )
-            st.experimental_rerun()
+            st.session_state.new_question = True
+            st.experimental_rerun()  # Optional: remove this line if automatic rerun from state is working well
+
         except ValueError:
             st.warning("Please enter a valid number.")
 
